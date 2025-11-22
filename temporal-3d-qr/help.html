@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help & Documentation - Temporal 3D QR Code</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+
+  <style>
+    .help-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .help-section {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2rem;
+    }
+
+    .help-section h2 {
+      color: var(--primary);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .faq-item {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-question {
+      font-weight: 600;
+      font-size: 1.125rem;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .faq-answer {
+      color: var(--text-gray);
+      line-height: 1.6;
+    }
+
+    .code-block {
+      background: #1F2937;
+      color: #10B981;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .feature-list li {
+      padding: 0.75rem 0;
+      padding-left: 2rem;
+      position: relative;
+    }
+
+    .feature-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--success);
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container nav-container">
+      <div class="nav-logo">⚡ Temporal 3D QR</div>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="teacher.html" class="nav-link">Teacher</a></li>
+        <li><a href="student.html" class="nav-link">Student</a></li>
+        <li><a href="demo.html" class="nav-link">Live Demo</a></li>
+        <li><a href="analytics.html" class="nav-link">Analytics</a></li>
+        <li><a href="help.html" class="nav-link">Help</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="help-container">
+    <h1>📚 Help & Documentation</h1>
+    <p style="color: var(--text-gray); margin-bottom: 2rem;">
+      Everything you need to know about using Temporal 3D QR Code system
+    </p>
+
+    <!-- Getting Started -->
+    <div class="help-section">
+      <h2>🚀 Getting Started</h2>
+
+      <h3>For Teachers</h3>
+      <ol>
+        <li>Open the <a href="teacher.html">Teacher Dashboard</a></li>
+        <li>Enter session name and course ID</li>
+        <li>Click "Start" to generate the temporal QR code</li>
+        <li>Display the animated QR code to students</li>
+        <li>Watch students check in automatically</li>
+        <li>Click "Stop" when done and export attendance</li>
+      </ol>
+
+      <h3>For Students</h3>
+      <ol>
+        <li>Open the <a href="student.html">Student Scanner</a> on your phone</li>
+        <li>Allow camera access when prompted</li>
+        <li>Point your camera at the teacher's QR code</li>
+        <li>Click "Start Scanning"</li>
+        <li>Keep camera steady for 1-2 seconds</li>
+        <li>Wait for confirmation message</li>
+      </ol>
+    </div>
+
+    <!-- FAQ -->
+    <div class="help-section">
+      <h2>❓ Frequently Asked Questions</h2>
+
+      <div class="faq-item">
+        <div class="faq-question">What makes this QR code "3D"?</div>
+        <div class="faq-answer">
+          The "3D" refers to using time as the third dimension. Unlike traditional 2D QR codes that are static images, our Temporal 3D QR codes change 60 times per second. This temporal dimension makes them impossible to counterfeit with screenshots or photos.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Why can't I just take a screenshot?</div>
+        <div class="faq-answer">
+          Screenshots are static images frozen in time. Our system requires capturing multiple sequential frames with progressive timestamps. When you try to scan a screenshot, all frames are identical, which immediately fails validation.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">What if I don't have internet connection?</div>
+        <div class="faq-answer">
+          The system works perfectly offline! When you scan without internet, your phone generates a cryptographic proof of attendance that's stored locally and encrypted. Once you're back online, it automatically syncs to the server for validation.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">How long does scanning take?</div>
+        <div class="faq-answer">
+          Scanning typically takes 300-500 milliseconds (less than half a second). The system captures 5-10 frames and validates them in real-time for the fastest possible attendance marking.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">What devices are supported?</div>
+        <div class="faq-answer">
+          Any modern smartphone or tablet with a camera works! The system uses standard web technologies (HTML5, WebRTC) so there's no app to install. Just open the scanner page in your browser (Chrome, Firefox, Safari, Edge all supported).
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Can someone record the screen and replay it?</div>
+        <div class="faq-answer">
+          No! The system validates that timestamps are current (within 2-second window) and that cryptographic challenges haven't been used before. Old recordings are immediately detected and rejected as replay attacks.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">What if scanning fails?</div>
+        <div class="faq-answer">
+          If scanning fails, try:
+          <ul>
+            <li>Moving closer or farther from the QR code</li>
+            <li>Ensuring good lighting</li>
+            <li>Holding your phone steady</li>
+            <li>Refreshing the page and trying again</li>
+          </ul>
+          If problems persist, check that your camera has permission to access the camera.
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical Specifications -->
+    <div class="help-section">
+      <h2>🔧 Technical Specifications</h2>
+
+      <h3>System Requirements</h3>
+      <ul class="feature-list">
+        <li>Modern web browser (Chrome 80+, Firefox 75+, Safari 13+, Edge 80+)</li>
+        <li>JavaScript enabled</li>
+        <li>Camera access (for students)</li>
+        <li>Internet connection (optional - works offline)</li>
+      </ul>
+
+      <h3>Security Features</h3>
+      <ul class="feature-list">
+        <li>60 FPS temporal encoding</li>
+        <li>Cryptographic challenge chains (SHA-256)</li>
+        <li>Multi-factor temporal coherence validation</li>
+        <li>Hardware-backed signatures (when available)</li>
+        <li>Device attestation and fingerprinting</li>
+        <li>Encrypted offline proof storage</li>
+      </ul>
+
+      <h3>Performance</h3>
+      <div class="code-block">
+QR Generation:     60 FPS (16.67ms per frame)
+Frame Capture:     200-350ms (5-10 frames)
+Validation Time:   20-40ms
+Network Transfer:  50-150ms
+Total E2E Time:    300-600ms
+      </div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="help-section">
+      <h2>🛠️ Troubleshooting</h2>
+
+      <h3>Camera Not Working</h3>
+      <div class="faq-answer">
+        <strong>Problem:</strong> Camera doesn't start or shows black screen<br>
+        <strong>Solution:</strong>
+        <ul>
+          <li>Check browser permissions (allow camera access)</li>
+          <li>Close other apps using the camera</li>
+          <li>Try a different browser</li>
+          <li>Restart your device</li>
+        </ul>
+      </div>
+
+      <h3>QR Code Not Detected</h3>
+      <div class="faq-answer">
+        <strong>Problem:</strong> Scanner doesn't detect the QR code<br>
+        <strong>Solution:</strong>
+        <ul>
+          <li>Ensure QR code is fully visible in the camera frame</li>
+          <li>Improve lighting conditions</li>
+          <li>Clean your camera lens</li>
+          <li>Try moving closer or farther</li>
+          <li>Make sure the teacher's screen is showing the animated QR</li>
+        </ul>
+      </div>
+
+      <h3>Offline Sync Not Working</h3>
+      <div class="faq-answer">
+        <strong>Problem:</strong> Offline proofs not syncing when back online<br>
+        <strong>Solution:</strong>
+        <ul>
+          <li>Check your internet connection</li>
+          <li>Open the student scanner page to trigger sync</li>
+          <li>Check browser console for errors</li>
+          <li>Clear browser cache and try again</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="help-section">
+      <h2>📧 Contact & Support</h2>
+      <p>
+        <strong>Inventor:</strong> Mus Ab Ali<br>
+        <strong>Location:</strong> Muzaffarnagar, India<br>
+        <strong>Status:</strong> Patent Pending
+      </p>
+      <p>
+        For technical support, licensing inquiries, or collaboration opportunities,
+        please contact the inventor directly.
+      </p>
+    </div>
+
+    <!-- Patent Information -->
+    <div class="help-section">
+      <h2>⚖️ Patent Information</h2>
+      <p>
+        This technology is patent-pending. Key innovations include:
+      </p>
+      <ul class="feature-list">
+        <li>Temporal dimension encoding for anti-counterfeiting</li>
+        <li>Offline cryptographic proof generation</li>
+        <li>Multi-factor temporal coherence validation</li>
+        <li>Rolling cryptographic challenge chains</li>
+      </ul>
+      <p>
+        Unauthorized use, reproduction, or distribution is prohibited.
+        For licensing information, contact the inventor.
+      </p>
+    </div>
+  </div>
+
+</body>
+</html>
