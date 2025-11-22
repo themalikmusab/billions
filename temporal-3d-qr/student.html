@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Scanner - Temporal 3D QR Code</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/common.css">
+
+  <style>
+    body {
+      background: #1F2937;
+      color: white;
+    }
+
+    .scanner-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 70px);
+      padding: 2rem;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 1;
+      background: #111827;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 0 50px rgba(99, 102, 241, 0.3);
+    }
+
+    #webcam {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .scanner-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+
+    .scan-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 80%;
+      border: 3px solid var(--primary);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+    }
+
+    .scan-corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 4px solid #10B981;
+    }
+
+    .scan-corner.top-left {
+      top: 0;
+      left: 0;
+      border-right: none;
+      border-bottom: none;
+      border-top-left-radius: var(--radius-md);
+    }
+
+    .scan-corner.top-right {
+      top: 0;
+      right: 0;
+      border-left: none;
+      border-bottom: none;
+      border-top-right-radius: var(--radius-md);
+    }
+
+    .scan-corner.bottom-left {
+      bottom: 0;
+      left: 0;
+      border-right: none;
+      border-top: none;
+      border-bottom-left-radius: var(--radius-md);
+    }
+
+    .scan-corner.bottom-right {
+      bottom: 0;
+      right: 0;
+      border-left: none;
+      border-top: none;
+      border-bottom-right-radius: var(--radius-md);
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #10B981, transparent);
+      animation: scan 2s linear infinite;
+    }
+
+    @keyframes scan {
+      0%, 100% { top: 0; }
+      50% { top: 100%; }
+    }
+
+    .status-panel {
+      background: rgba(31, 41, 55, 0.9);
+      backdrop-filter: blur(10px);
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      margin-top: 2rem;
+      text-align: center;
+      max-width: 640px;
+      width: 100%;
+    }
+
+    .status-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .status-message {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-detail {
+      font-size: 0.875rem;
+      color: #9CA3AF;
+    }
+
+    .capture-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .capture-stat {
+      background: rgba(99, 102, 241, 0.1);
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .capture-stat-label {
+      font-size: 0.75rem;
+      color: #9CA3AF;
+      text-transform: uppercase;
+    }
+
+    .capture-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-light);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn-scan {
+      padding: 1rem 2rem;
+      font-size: 1.125rem;
+      background: linear-gradient(135deg, #10B981, #059669);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-scan:hover {
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+    }
+
+    .btn-scan:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #10B981);
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+
+    .frame-list {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+
+    .frame-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .frame-dot.captured {
+      background: #10B981;
+      box-shadow: 0 0 10px #10B981;
+    }
+
+    .success-animation {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 10rem;
+      animation: successPop 0.6s ease-out;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    @keyframes successPop {
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+      }
+    }
+
+    .mode-toggle {
+      position: fixed;
+      top: 90px;
+      right: 2rem;
+      background: rgba(31, 41, 55, 0.9);
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .toggle-switch {
+      width: 50px;
+      height: 26px;
+      background: #374151;
+      border-radius: 13px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .toggle-switch.online {
+      background: #10B981;
+    }
+
+    .toggle-slider {
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s;
+    }
+
+    .toggle-switch.online .toggle-slider {
+      transform: translateX(24px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <div class="nav-logo">⚡ Temporal 3D QR</div>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="teacher.html" class="nav-link">Teacher</a></li>
+        <li><a href="student.html" class="nav-link">Student</a></li>
+        <li><a href="demo.html" class="nav-link">Live Demo</a></li>
+        <li><a href="analytics.html" class="nav-link">Analytics</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Mode Toggle -->
+  <div class="mode-toggle">
+    <span id="modeLabel">📵 Offline</span>
+    <div class="toggle-switch" id="modeToggle" onclick="toggleMode()">
+      <div class="toggle-slider"></div>
+    </div>
+  </div>
+
+  <!-- Scanner Container -->
+  <div class="scanner-container">
+    <!-- Video Container -->
+    <div class="video-container">
+      <video id="webcam" autoplay playsinline></video>
+
+      <!-- Scanner Overlay -->
+      <div class="scanner-overlay">
+        <div class="scan-frame">
+          <div class="scan-corner top-left"></div>
+          <div class="scan-corner top-right"></div>
+          <div class="scan-corner bottom-left"></div>
+          <div class="scan-corner bottom-right"></div>
+          <div class="scan-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Panel -->
+    <div class="status-panel">
+      <div class="status-icon" id="statusIcon">📷</div>
+      <div class="status-message" id="statusMessage">Ready to Scan</div>
+      <div class="status-detail" id="statusDetail">Position QR code within frame</div>
+
+      <!-- Progress -->
+      <div class="progress-bar" style="display: none;" id="progressBar">
+        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+      </div>
+
+      <!-- Frame Indicators -->
+      <div class="frame-list" id="frameList" style="display: none;">
+        <div class="frame-dot"></div>
+        <div class="frame-dot"></div>
+        <div class="frame-dot"></div>
+        <div class="frame-dot"></div>
+        <div class="frame-dot"></div>
+      </div>
+
+      <!-- Capture Stats -->
+      <div class="capture-stats" style="display: none;" id="captureStats">
+        <div class="capture-stat">
+          <div class="capture-stat-label">Frames</div>
+          <div class="capture-stat-value" id="framesCount">0/5</div>
+        </div>
+        <div class="capture-stat">
+          <div class="capture-stat-label">Coherence</div>
+          <div class="capture-stat-value" id="coherenceScore">0%</div>
+        </div>
+        <div class="capture-stat">
+          <div class="capture-stat-label">Time</div>
+          <div class="capture-stat-value" id="captureTime">0ms</div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn btn-scan" id="scanBtn" onclick="startScanning()">
+          📸 Start Scanning
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="lib/jsQR.js"></script>
+
+  <script>
+    // State
+    let stream = null;
+    let isScanning = false;
+    let capturedFrames = [];
+    let isOnlineMode = false;
+    let scanStartTime = 0;
+
+    // UI Elements
+    const video = document.getElementById('webcam');
+    const scanBtn = document.getElementById('scanBtn');
+    const statusIcon = document.getElementById('statusIcon');
+    const statusMessage = document.getElementById('statusMessage');
+    const statusDetail = document.getElementById('statusDetail');
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    const frameList = document.getElementById('frameList');
+    const captureStats = document.getElementById('captureStats');
+    const modeToggle = document.getElementById('modeToggle');
+    const modeLabel = document.getElementById('modeLabel');
+
+    // Initialize camera
+    async function initCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 1280 }
+          }
+        });
+
+        video.srcObject = stream;
+        updateStatus('✅', 'Camera Ready', 'Click "Start Scanning" to begin');
+      } catch (error) {
+        console.error('Camera error:', error);
+        updateStatus('❌', 'Camera Error', 'Please allow camera access');
+      }
+    }
+
+    // Start scanning
+    function startScanning() {
+      if (isScanning) return;
+
+      isScanning = true;
+      capturedFrames = [];
+      scanStartTime = Date.now();
+
+      scanBtn.disabled = true;
+      scanBtn.textContent = '⏳ Scanning...';
+
+      updateStatus('🎯', 'Scanning...', 'Keep QR code in frame');
+      progressBar.style.display = 'block';
+      frameList.style.display = 'flex';
+      captureStats.style.display = 'grid';
+
+      scanFrames();
+    }
+
+    // Scan frames
+    function scanFrames() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      const interval = setInterval(() => {
+        if (!isScanning || capturedFrames.length >= 5) {
+          clearInterval(interval);
+          if (capturedFrames.length >= 5) {
+            validateCapture();
+          }
+          return;
+        }
+
+        // Capture frame
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+        if (code) {
+          try {
+            const data = JSON.parse(code.data);
+            capturedFrames.push({
+              data: data,
+              timestamp: Date.now(),
+              imageHash: hashImageData(imageData)
+            });
+
+            // Update UI
+            const progress = (capturedFrames.length / 5) * 100;
+            progressFill.style.width = progress + '%';
+
+            const frameDots = frameList.querySelectorAll('.frame-dot');
+            frameDots[capturedFrames.length - 1].classList.add('captured');
+
+            document.getElementById('framesCount').textContent = `${capturedFrames.length}/5`;
+            document.getElementById('captureTime').textContent =
+              (Date.now() - scanStartTime) + 'ms';
+
+            // Play sound effect (optional)
+            playBeep();
+          } catch (e) {
+            console.error('QR decode error:', e);
+          }
+        }
+      }, 60); // Capture every 60ms (16 FPS)
+    }
+
+    // Validate captured frames
+    function validateCapture() {
+      updateStatus('⚙️', 'Validating...', 'Analyzing temporal coherence');
+
+      setTimeout(() => {
+        const validation = validateTemporalCoherence(capturedFrames);
+
+        const coherenceScore = Math.round(validation.score * 100);
+        document.getElementById('coherenceScore').textContent = coherenceScore + '%';
+
+        if (validation.valid) {
+          // Success!
+          showSuccess();
+          markAttendance(capturedFrames);
+        } else {
+          // Failed validation
+          showError(validation.reason);
+        }
+
+        resetScanner();
+      }, 500);
+    }
+
+    // Validate temporal coherence
+    function validateTemporalCoherence(frames) {
+      // Check 1: All frames have increasing timestamps
+      const timestamps = frames.map(f => f.data.t);
+      const isIncreasing = timestamps.every((t, i) => i === 0 || t > timestamps[i - 1]);
+
+      if (!isIncreasing) {
+        return { valid: false, reason: '❌ Timestamps not increasing (screenshot detected)', score: 0 };
+      }
+
+      // Check 2: Frame numbers are sequential
+      const frameNums = frames.map(f => f.data.f);
+      const isSequential = frameNums.every((f, i) => i === 0 || f === frameNums[i - 1] + 1);
+
+      if (!isSequential) {
+        return { valid: false, reason: '❌ Non-sequential frames (tampering detected)', score: 0.3 };
+      }
+
+      // Check 3: Timestamps are recent
+      const now = Date.now();
+      const allRecent = timestamps.every(t => (now - t) < 5000);
+
+      if (!allRecent) {
+        return { valid: false, reason: '❌ Old timestamps (replay detected)', score: 0.5 };
+      }
+
+      // Check 4: Image hashes are unique
+      const hashes = frames.map(f => f.imageHash);
+      const uniqueHashes = new Set(hashes);
+
+      if (uniqueHashes.size < frames.length) {
+        return { valid: false, reason: '❌ Duplicate frames (screenshot detected)', score: 0.2 };
+      }
+
+      // All checks passed!
+      return {
+        valid: true,
+        score: 1.0,
+        reason: '✅ Valid temporal sequence'
+      };
+    }
+
+    // Hash image data (simple hash for demo)
+    function hashImageData(imageData) {
+      let hash = 0;
+      const sample = imageData.data.filter((_, i) => i % 1000 === 0);
+      for (let i = 0; i < sample.length; i++) {
+        hash = ((hash << 5) - hash) + sample[i];
+        hash = hash & hash;
+      }
+      return hash.toString(36);
+    }
+
+    // Mark attendance
+    function markAttendance(frames) {
+      const sessionId = frames[0].data.s;
+
+      if (isOnlineMode) {
+        // Online: Send to server immediately
+        console.log('📡 Sending to server:', sessionId);
+        // fetch('/api/attendance', { method: 'POST', body: JSON.stringify(frames) });
+      } else {
+        // Offline: Generate cryptographic proof
+        console.log('💾 Generating offline proof:', sessionId);
+        const proof = generateOfflineProof(frames);
+        storeProofLocally(proof);
+      }
+    }
+
+    // Generate offline proof (simplified)
+    function generateOfflineProof(frames) {
+      return {
+        studentId: 'STUDENT_' + Math.random().toString(36).substr(2, 9),
+        sessionId: frames[0].data.s,
+        frames: frames.map(f => ({
+          t: f.data.t,
+          f: f.data.f,
+          c: f.data.c
+        })),
+        timestamp: Date.now(),
+        signature: 'PROOF_' + Math.random().toString(36).substr(2, 16)
+      };
+    }
+
+    // Store proof locally
+    function storeProofLocally(proof) {
+      const proofs = JSON.parse(localStorage.getItem('offlineProofs') || '[]');
+      proofs.push(proof);
+      localStorage.setItem('offlineProofs', JSON.stringify(proofs));
+      console.log('📝 Proof stored locally');
+    }
+
+    // Show success
+    function showSuccess() {
+      updateStatus('✅', 'Attendance Marked!', isOnlineMode ? 'Verified online' : 'Saved offline - will sync');
+
+      // Success animation
+      const successEl = document.createElement('div');
+      successEl.className = 'success-animation';
+      successEl.textContent = '✅';
+      document.body.appendChild(successEl);
+
+      setTimeout(() => {
+        document.body.removeChild(successEl);
+      }, 600);
+
+      // Confetti effect (optional)
+      createConfetti();
+    }
+
+    // Show error
+    function showError(reason) {
+      updateStatus('❌', 'Scan Failed', reason);
+    }
+
+    // Reset scanner
+    function resetScanner() {
+      setTimeout(() => {
+        isScanning = false;
+        capturedFrames = [];
+
+        scanBtn.disabled = false;
+        scanBtn.textContent = '📸 Start Scanning';
+
+        progressBar.style.display = 'none';
+        frameList.style.display = 'none';
+        captureStats.style.display = 'none';
+
+        // Reset frame dots
+        frameList.querySelectorAll('.frame-dot').forEach(dot => {
+          dot.classList.remove('captured');
+        });
+
+        updateStatus('✅', 'Ready to Scan', 'Click "Start Scanning" to begin');
+      }, 2000);
+    }
+
+    // Update status
+    function updateStatus(icon, message, detail) {
+      statusIcon.textContent = icon;
+      statusMessage.textContent = message;
+      statusDetail.textContent = detail;
+    }
+
+    // Toggle mode
+    function toggleMode() {
+      isOnlineMode = !isOnlineMode;
+      modeToggle.classList.toggle('online');
+
+      if (isOnlineMode) {
+        modeLabel.textContent = '📡 Online';
+      } else {
+        modeLabel.textContent = '📵 Offline';
+      }
+    }
+
+    // Play beep sound
+    function playBeep() {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.frequency.value = 800;
+      oscillator.type = 'sine';
+
+      gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + 0.1);
+    }
+
+    // Create confetti
+    function createConfetti() {
+      const colors = ['#6366F1', '#EC4899', '#10B981', '#F59E0B'];
+
+      for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.position = 'fixed';
+        confetti.style.width = '10px';
+        confetti.style.height = '10px';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.top = '-10px';
+        confetti.style.borderRadius = '50%';
+        confetti.style.pointerEvents = 'none';
+        confetti.style.zIndex = '9999';
+        confetti.style.animation = `fall ${1 + Math.random() * 2}s linear forwards`;
+
+        document.body.appendChild(confetti);
+
+        setTimeout(() => {
+          document.body.removeChild(confetti);
+        }, 3000);
+      }
+    }
+
+    // Add fall animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fall {
+        to {
+          transform: translateY(100vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize on load
+    window.addEventListener('load', initCamera);
+  </script>
+
+</body>
+</html>

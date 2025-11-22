@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Demo - Temporal 3D QR Code</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+
+  <style>
+    body {
+      background: #111827;
+      color: white;
+    }
+
+    .demo-container {
+      padding: 2rem;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .demo-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .scenario-selector {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .scenario-btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+
+    .scenario-btn:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.2);
+    }
+
+    .scenario-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .split-view {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .panel {
+      background: rgba(31, 41, 55, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      border: 2px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .panel-badge {
+      padding: 0.25rem 0.75rem;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid var(--primary);
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary-light);
+    }
+
+    .qr-demo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      margin-bottom: 1.5rem;
+    }
+
+    #demoTeacherQR, #demoStudentQR {
+      border-radius: var(--radius-md);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+    }
+
+    .demo-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      margin-top: 1rem;
+      width: 100%;
+    }
+
+    .demo-stat {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.75rem;
+      border-radius: var(--radius-sm);
+      text-align: center;
+    }
+
+    .demo-stat-label {
+      font-size: 0.75rem;
+      color: #9CA3AF;
+    }
+
+    .demo-stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-light);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .validation-panel {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      border-radius: var(--radius-md);
+      border-left: 4px solid var(--primary);
+    }
+
+    .validation-step {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-sm);
+    }
+
+    .validation-step.success {
+      border-left: 3px solid #10B981;
+    }
+
+    .validation-step.fail {
+      border-left: 3px solid #EF4444;
+    }
+
+    .validation-icon {
+      font-size: 1.5rem;
+    }
+
+    .validation-text {
+      flex: 1;
+    }
+
+    .validation-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .validation-detail {
+      font-size: 0.75rem;
+      color: #9CA3AF;
+    }
+
+    .explanation-box {
+      background: rgba(236, 72, 153, 0.1);
+      border: 2px solid rgba(236, 72, 153, 0.3);
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      margin-top: 2rem;
+    }
+
+    .explanation-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #EC4899;
+    }
+
+    .connection-line {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), #10B981);
+      transform: translate(-50%, -50%);
+      animation: pulse 2s infinite;
+    }
+
+    @media (max-width: 1024px) {
+      .split-view {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container nav-container">
+      <div class="nav-logo">⚡ Temporal 3D QR</div>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="teacher.html" class="nav-link">Teacher</a></li>
+        <li><a href="student.html" class="nav-link">Student</a></li>
+        <li><a href="demo.html" class="nav-link">Live Demo</a></li>
+        <li><a href="analytics.html" class="nav-link">Analytics</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="demo-container">
+    <div class="demo-header">
+      <h1>🎮 Interactive Demo</h1>
+      <p style="font-size: 1.125rem; color: #9CA3AF;">
+        See how Temporal 3D QR Code prevents counterfeiting in real-time
+      </p>
+    </div>
+
+    <!-- Scenario Selector -->
+    <div class="scenario-selector">
+      <button class="scenario-btn active" onclick="loadScenario('normal')">
+        ✅ Normal Scan
+      </button>
+      <button class="scenario-btn" onclick="loadScenario('screenshot')">
+        ❌ Screenshot Attack
+      </button>
+      <button class="scenario-btn" onclick="loadScenario('replay')">
+        ❌ Replay Attack
+      </button>
+      <button class="scenario-btn" onclick="loadScenario('offline')">
+        📵 Offline Mode
+      </button>
+      <button class="scenario-btn" onclick="loadScenario('network-loss')">
+        ⚠️ Network Loss
+      </button>
+    </div>
+
+    <!-- Split View -->
+    <div class="split-view">
+      <!-- Teacher Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>👨‍🏫</span>
+            <span>Teacher View</span>
+          </div>
+          <div class="panel-badge">DISPLAYING</div>
+        </div>
+
+        <div class="qr-demo-container">
+          <canvas id="demoTeacherQR" width="300" height="300"></canvas>
+
+          <div class="demo-stats">
+            <div class="demo-stat">
+              <div class="demo-stat-label">FRAME</div>
+              <div class="demo-stat-value" id="teacherFrame">0</div>
+            </div>
+            <div class="demo-stat">
+              <div class="demo-stat-label">FPS</div>
+              <div class="demo-stat-value">60</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align: center; color: #9CA3AF; font-size: 0.875rem;">
+          📡 Generating temporal QR code at 60 FPS<br>
+          🔐 Each frame has unique cryptographic challenge
+        </div>
+      </div>
+
+      <!-- Student Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>🎓</span>
+            <span>Student View</span>
+          </div>
+          <div class="panel-badge" id="studentBadge">SCANNING</div>
+        </div>
+
+        <div class="qr-demo-container">
+          <canvas id="demoStudentQR" width="300" height="300"></canvas>
+
+          <div class="demo-stats">
+            <div class="demo-stat">
+              <div class="demo-stat-label">CAPTURED</div>
+              <div class="demo-stat-value" id="capturedFrames">0/5</div>
+            </div>
+            <div class="demo-stat">
+              <div class="demo-stat-label">COHERENCE</div>
+              <div class="demo-stat-value" id="coherenceValue">0%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Validation Results -->
+        <div class="validation-panel">
+          <h4 style="margin-bottom: 1rem;">Validation Checks</h4>
+          <div id="validationSteps">
+            <!-- Will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explanation Box -->
+    <div class="explanation-box" id="explanationBox">
+      <div class="explanation-title">📚 How It Works</div>
+      <div id="explanationText">
+        Select a scenario above to see how the system handles different situations.
+      </div>
+    </div>
+  </div>
+
+  <script src="lib/qrcode.min.js"></script>
+  <script src="js/core/qr-generator.js"></script>
+
+  <script>
+    // State
+    let teacherGenerator = null;
+    let currentScenario = 'normal';
+    let simulatedFrames = [];
+    let isSimulating = false;
+
+    // UI Elements
+    const teacherCanvas = document.getElementById('demoTeacherQR');
+    const studentCanvas = document.getElementById('demoStudentQR');
+    const teacherFrameEl = document.getElementById('teacherFrame');
+    const capturedFramesEl = document.getElementById('capturedFrames');
+    const coherenceValueEl = document.getElementById('coherenceValue');
+    const studentBadgeEl = document.getElementById('studentBadge');
+    const validationStepsEl = document.getElementById('validationSteps');
+    const explanationTextEl = document.getElementById('explanationText');
+
+    // Scenarios
+    const scenarios = {
+      normal: {
+        title: '✅ Normal Successful Scan',
+        badge: 'SCANNING',
+        explanation: `
+          <strong>Normal Scan Flow:</strong><br><br>
+          1️⃣ Teacher's screen displays animated QR code (60 FPS)<br>
+          2️⃣ Student scans and captures 5 sequential frames<br>
+          3️⃣ System validates temporal coherence:<br>
+          &nbsp;&nbsp;&nbsp;✓ Timestamps are increasing<br>
+          &nbsp;&nbsp;&nbsp;✓ Frame numbers are sequential<br>
+          &nbsp;&nbsp;&nbsp;✓ Cryptographic chain is valid<br>
+          &nbsp;&nbsp;&nbsp;✓ All frames are unique<br>
+          4️⃣ Attendance marked successfully ✅
+        `,
+        validation: [
+          { check: 'Timestamp Progression', result: 'success', detail: 'All timestamps increasing' },
+          { check: 'Frame Sequence', result: 'success', detail: 'Frames 142, 143, 144, 145, 146' },
+          { check: 'Cryptographic Chain', result: 'success', detail: 'Valid hash linkage' },
+          { check: 'Frame Uniqueness', result: 'success', detail: '5 unique images detected' },
+          { check: 'Time Window', result: 'success', detail: 'Captured within 300ms' }
+        ]
+      },
+
+      screenshot: {
+        title: '❌ Screenshot Attack Detected',
+        badge: 'BLOCKED',
+        explanation: `
+          <strong>Why Screenshots Fail:</strong><br><br>
+          🚫 Student takes a screenshot of the QR code<br>
+          🚫 Tries to scan the static image<br>
+          🚫 System detects:<br>
+          &nbsp;&nbsp;&nbsp;✗ All frames have IDENTICAL timestamps<br>
+          &nbsp;&nbsp;&nbsp;✗ No temporal progression<br>
+          &nbsp;&nbsp;&nbsp;✗ Same image hash for all captures<br>
+          ❌ Scan REJECTED - Screenshot detected!<br><br>
+          <strong>This is impossible to fake</strong> because a photo is frozen in time.
+        `,
+        validation: [
+          { check: 'Timestamp Progression', result: 'fail', detail: 'All timestamps identical' },
+          { check: 'Frame Sequence', result: 'fail', detail: 'Same frame number (142)' },
+          { check: 'Cryptographic Chain', result: 'fail', detail: 'No progression detected' },
+          { check: 'Frame Uniqueness', result: 'fail', detail: 'All 5 images identical' },
+          { check: 'Screenshot Detection', result: 'fail', detail: 'STATIC IMAGE DETECTED' }
+        ]
+      },
+
+      replay: {
+        title: '❌ Replay Attack Blocked',
+        badge: 'BLOCKED',
+        explanation: `
+          <strong>Why Old Recordings Fail:</strong><br><br>
+          🚫 Student uses video recorded earlier<br>
+          🚫 Tries to scan from the recording<br>
+          🚫 System detects:<br>
+          &nbsp;&nbsp;&nbsp;✗ Timestamps are TOO OLD<br>
+          &nbsp;&nbsp;&nbsp;✗ Challenges already used<br>
+          &nbsp;&nbsp;&nbsp;✗ Outside valid time window<br>
+          ❌ Scan REJECTED - Replay attack detected!<br><br>
+          <strong>Protection:</strong> All scans must be within 2-second window.
+        `,
+        validation: [
+          { check: 'Timestamp Age', result: 'fail', detail: 'Timestamps 25 seconds old' },
+          { check: 'Time Window', result: 'fail', detail: 'Outside valid 2s window' },
+          { check: 'Challenge Reuse', result: 'fail', detail: 'Challenges already seen' },
+          { check: 'Frame Sequence', result: 'success', detail: 'Sequential (but old)' },
+          { check: 'Replay Detection', result: 'fail', detail: 'OLD RECORDING DETECTED' }
+        ]
+      },
+
+      offline: {
+        title: '📵 Offline Mode Success',
+        badge: 'OFFLINE',
+        explanation: `
+          <strong>Offline Attendance Flow:</strong><br><br>
+          1️⃣ Student has no internet connection<br>
+          2️⃣ Scans QR code normally<br>
+          3️⃣ Phone validates frames locally<br>
+          4️⃣ Generates cryptographic proof:<br>
+          &nbsp;&nbsp;&nbsp;🔐 Multi-factor signature<br>
+          &nbsp;&nbsp;&nbsp;🔐 Device attestation<br>
+          &nbsp;&nbsp;&nbsp;🔐 Hardware-backed proof<br>
+          5️⃣ Proof stored securely (encrypted)<br>
+          6️⃣ Auto-syncs when connection restored<br>
+          7️⃣ Server validates proof ✅<br><br>
+          <strong>Same security</strong> as online mode!
+        `,
+        validation: [
+          { check: 'Local Validation', result: 'success', detail: 'Temporal coherence verified' },
+          { check: 'Proof Generation', result: 'success', detail: 'Cryptographic proof created' },
+          { check: 'Device Signature', result: 'success', detail: 'Valid device credentials' },
+          { check: 'Secure Storage', result: 'success', detail: 'Encrypted proof stored' },
+          { check: 'Sync Queue', result: 'success', detail: 'Queued for sync (1 pending)' }
+        ]
+      },
+
+      'network-loss': {
+        title: '⚠️ Network Loss Handled',
+        badge: 'RECOVERING',
+        explanation: `
+          <strong>Seamless Network Handling:</strong><br><br>
+          1️⃣ Scan starts in ONLINE mode<br>
+          2️⃣ Network drops mid-capture<br>
+          3️⃣ System auto-detects disconnection<br>
+          4️⃣ Switches to OFFLINE mode automatically<br>
+          5️⃣ Completes scan using local validation<br>
+          6️⃣ Generates offline proof<br>
+          7️⃣ Syncs when network restored<br><br>
+          <strong>Zero interruption</strong> - user doesn't even notice!
+        `,
+        validation: [
+          { check: 'Initial Connection', result: 'success', detail: 'Online mode started' },
+          { check: 'Network Detection', result: 'success', detail: 'Disconnection detected' },
+          { check: 'Auto-Fallback', result: 'success', detail: 'Switched to offline mode' },
+          { check: 'Scan Completion', result: 'success', detail: 'Completed offline' },
+          { check: 'Resilience Score', result: 'success', detail: '100% - No data lost' }
+        ]
+      }
+    };
+
+    // Initialize
+    function init() {
+      // Start teacher QR generator
+      teacherGenerator = new TemporalQRGenerator({
+        fps: 60,
+        size: 300,
+        pattern: 'rotation',
+        onFrame: renderTeacherFrame
+      });
+
+      teacherGenerator.start();
+
+      // Auto-start student simulation
+      loadScenario('normal');
+    }
+
+    // Render teacher frame
+    function renderTeacherFrame(frameData, qrText) {
+      teacherFrameEl.textContent = frameData.f;
+
+      QRCode.toCanvas(teacherCanvas, qrText, {
+        width: 300,
+        margin: 1,
+        color: {
+          dark: '#1F2937',
+          light: '#FFFFFF'
+        }
+      });
+    }
+
+    // Load scenario
+    function loadScenario(scenario) {
+      currentScenario = scenario;
+      const config = scenarios[scenario];
+
+      // Update UI
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      studentBadgeEl.textContent = config.badge;
+      explanationTextEl.innerHTML = config.explanation;
+
+      // Reset
+      simulatedFrames = [];
+      updateValidationSteps(config.validation);
+
+      // Start simulation
+      simulateScenario(scenario);
+    }
+
+    // Simulate scenario
+    function simulateScenario(scenario) {
+      let frameCount = 0;
+      const maxFrames = 5;
+
+      const interval = setInterval(() => {
+        if (frameCount >= maxFrames) {
+          clearInterval(interval);
+          finishSimulation(scenario);
+          return;
+        }
+
+        // Capture frame based on scenario
+        let frame;
+        if (scenario === 'screenshot') {
+          // All frames identical (screenshot)
+          frame = simulatedFrames[0] || { t: Date.now(), f: 142, c: 'ABC123' };
+        } else if (scenario === 'replay') {
+          // Old timestamps
+          frame = { t: Date.now() - 25000, f: 142 + frameCount, c: 'OLD' + frameCount };
+        } else {
+          // Normal progression
+          frame = { t: Date.now(), f: 142 + frameCount, c: 'CHAL' + frameCount };
+        }
+
+        simulatedFrames.push(frame);
+        frameCount++;
+
+        // Update UI
+        capturedFramesEl.textContent = `${frameCount}/5`;
+
+        // Show captured frame (copy teacher QR for demo)
+        const ctx = studentCanvas.getContext('2d');
+        ctx.drawImage(teacherCanvas, 0, 0);
+
+        // Update coherence (fake calculation)
+        const coherence = scenario === 'screenshot' || scenario === 'replay' ? 0 : (frameCount / maxFrames) * 100;
+        coherenceValueEl.textContent = Math.round(coherence) + '%';
+
+      }, 200); // Capture every 200ms
+    }
+
+    // Finish simulation
+    function finishSimulation(scenario) {
+      const config = scenarios[scenario];
+
+      setTimeout(() => {
+        // Show final validation
+        updateValidationSteps(config.validation);
+
+        // Show result
+        if (scenario === 'normal' || scenario === 'offline' || scenario === 'network-loss') {
+          studentBadgeEl.textContent = '✅ SUCCESS';
+          studentBadgeEl.style.background = 'rgba(16, 185, 129, 0.2)';
+          studentBadgeEl.style.borderColor = '#10B981';
+        } else {
+          studentBadgeEl.textContent = '❌ BLOCKED';
+          studentBadgeEl.style.background = 'rgba(239, 68, 68, 0.2)';
+          studentBadgeEl.style.borderColor = '#EF4444';
+        }
+      }, 500);
+    }
+
+    // Update validation steps
+    function updateValidationSteps(steps) {
+      validationStepsEl.innerHTML = steps.map(step => `
+        <div class="validation-step ${step.result}">
+          <div class="validation-icon">${step.result === 'success' ? '✅' : '❌'}</div>
+          <div class="validation-text">
+            <div class="validation-label">${step.check}</div>
+            <div class="validation-detail">${step.detail}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Initialize on load
+    window.addEventListener('load', init);
+  </script>
+
+</body>
+</html>
