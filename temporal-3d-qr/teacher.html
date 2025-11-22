@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard - Temporal 3D QR Code</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/common.css">
+
+  <style>
+    body {
+      background: var(--bg-light);
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .main-panel {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .qr-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f0f0f0 0%, #ffffff 100%);
+      border-radius: var(--radius-lg);
+      margin-bottom: 2rem;
+    }
+
+    #teacherQR {
+      border: 4px solid var(--primary);
+      border-radius: var(--radius-md);
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+      background: white;
+    }
+
+    .qr-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+      width: 100%;
+    }
+
+    .stat-box {
+      background: white;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 0.25rem;
+    }
+
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .control-group {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+
+    .control-group h3 {
+      margin-bottom: 1rem;
+      font-size: 1.125rem;
+      color: var(--text-dark);
+    }
+
+    .control-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .control-buttons .btn {
+      flex: 1;
+      padding: 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .slider-control {
+      margin-bottom: 1rem;
+    }
+
+    .slider-control label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-gray);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      transition: border-color var(--transition-fast);
+    }
+
+    select:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .students-list {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+
+    .student-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      animation: slideInUp 0.3s ease-out;
+    }
+
+    .student-item:last-child {
+      border-bottom: none;
+    }
+
+    .student-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .student-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 0.875rem;
+    }
+
+    .student-time {
+      font-size: 0.75rem;
+      color: var(--text-gray);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    .challenge-chain {
+      background: #1F2937;
+      color: #10B981;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+    }
+
+    .challenge-item {
+      padding: 0.25rem 0;
+      opacity: 0.7;
+    }
+
+    .challenge-item:last-child {
+      opacity: 1;
+      color: #34D399;
+      font-weight: 700;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <div class="nav-logo">⚡ Temporal 3D QR</div>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="teacher.html" class="nav-link">Teacher</a></li>
+        <li><a href="student.html" class="nav-link">Student</a></li>
+        <li><a href="demo.html" class="nav-link">Live Demo</a></li>
+        <li><a href="analytics.html" class="nav-link">Analytics</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Dashboard -->
+  <div class="dashboard">
+    <!-- Main Panel -->
+    <div class="main-panel">
+      <h2>👨‍🏫 Teacher Dashboard</h2>
+      <p class="text-gray">Generate temporal QR code for attendance</p>
+
+      <!-- QR Display -->
+      <div class="qr-display">
+        <canvas id="teacherQR" width="400" height="400"></canvas>
+
+        <div class="qr-stats">
+          <div class="stat-box">
+            <div class="stat-label">Frame</div>
+            <div class="stat-value" id="currentFrame">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">FPS</div>
+            <div class="stat-value" id="currentFPS">60</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Runtime</div>
+            <div class="stat-value" id="runtime">00:00</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Students</div>
+            <div class="stat-value" id="studentCount">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Students List -->
+      <div class="students-list">
+        <h3>Recent Check-ins</h3>
+        <div id="studentsList">
+          <p class="text-gray text-center">No students checked in yet</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+      <!-- Session Setup -->
+      <div class="control-group">
+        <h3>📚 Session Setup</h3>
+        <input type="text" id="sessionName" placeholder="Session Name" value="Attendance Session">
+        <input type="text" id="courseId" placeholder="Course ID" value="CS101">
+
+        <div class="control-buttons">
+          <button class="btn btn-success" id="startBtn">
+            ▶️ Start
+          </button>
+          <button class="btn btn-outline" id="pauseBtn" disabled>
+            ⏸️ Pause
+          </button>
+          <button class="btn btn-outline" id="stopBtn" disabled>
+            ⏹️ Stop
+          </button>
+        </div>
+      </div>
+
+      <!-- QR Settings -->
+      <div class="control-group">
+        <h3>⚙️ QR Settings</h3>
+
+        <div class="slider-control">
+          <label>
+            <span>Frame Rate</span>
+            <span id="fpsValue">60 FPS</span>
+          </label>
+          <input type="range" id="fpsSlider" min="15" max="60" value="60" step="15">
+        </div>
+
+        <div class="slider-control">
+          <label>
+            <span>QR Size</span>
+            <span id="sizeValue">400px</span>
+          </label>
+          <input type="range" id="sizeSlider" min="200" max="600" value="400" step="50">
+        </div>
+
+        <label style="font-size: 0.875rem; color: var(--text-gray);">Pattern</label>
+        <select id="patternSelect">
+          <option value="rotation">Rotation</option>
+          <option value="wave">Wave</option>
+          <option value="pulse">Pulse</option>
+        </select>
+      </div>
+
+      <!-- Challenge Chain -->
+      <div class="control-group">
+        <h3>🔐 Challenge Chain</h3>
+        <p style="font-size: 0.75rem; color: var(--text-gray);">Last 10 cryptographic challenges</p>
+        <div class="challenge-chain" id="challengeChain">
+          <div class="challenge-item">Waiting to start...</div>
+        </div>
+      </div>
+
+      <!-- Export -->
+      <div class="control-group">
+        <h3>💾 Export</h3>
+        <button class="btn btn-primary" style="width: 100%;" onclick="exportAttendance()">
+          📥 Download Attendance
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="lib/qrcode.min.js"></script>
+  <script src="js/core/qr-generator.js"></script>
+
+  <script>
+    // Initialize
+    const canvas = document.getElementById('teacherQR');
+    const ctx = canvas.getContext('2d');
+    let generator = null;
+    let students = [];
+
+    // UI Elements
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const fpsSlider = document.getElementById('fpsSlider');
+    const sizeSlider = document.getElementById('sizeSlider');
+    const patternSelect = document.getElementById('patternSelect');
+    const sessionNameInput = document.getElementById('sessionName');
+    const courseIdInput = document.getElementById('courseId');
+
+    // Stats
+    const currentFrameEl = document.getElementById('currentFrame');
+    const currentFPSEl = document.getElementById('currentFPS');
+    const runtimeEl = document.getElementById('runtime');
+    const studentCountEl = document.getElementById('studentCount');
+    const challengeChainEl = document.getElementById('challengeChain');
+    const studentsListEl = document.getElementById('studentsList');
+
+    // Controls
+    fpsSlider.addEventListener('input', (e) => {
+      document.getElementById('fpsValue').textContent = e.target.value + ' FPS';
+    });
+
+    sizeSlider.addEventListener('input', (e) => {
+      const size = parseInt(e.target.value);
+      document.getElementById('sizeValue').textContent = size + 'px';
+      canvas.width = size;
+      canvas.height = size;
+    });
+
+    // Start Session
+    startBtn.addEventListener('click', () => {
+      const config = {
+        fps: parseInt(fpsSlider.value),
+        size: parseInt(sizeSlider.value),
+        pattern: patternSelect.value,
+        sessionName: sessionNameInput.value,
+        courseId: courseIdInput.value,
+        onFrame: renderFrame,
+        onStart: (data) => {
+          console.log('Session started:', data);
+          startBtn.disabled = true;
+          pauseBtn.disabled = false;
+          stopBtn.disabled = false;
+        },
+        onStop: (stats) => {
+          console.log('Session stopped:', stats);
+          startBtn.disabled = false;
+          pauseBtn.disabled = true;
+          stopBtn.disabled = true;
+        }
+      };
+
+      generator = new TemporalQRGenerator(config);
+      generator.start();
+
+      // Simulate student check-ins (remove in production)
+      simulateStudentCheckins();
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      if (generator) {
+        if (generator.isRunning) {
+          generator.pause();
+          pauseBtn.textContent = '▶️ Resume';
+        } else {
+          generator.resume();
+          pauseBtn.textContent = '⏸️ Pause';
+        }
+      }
+    });
+
+    stopBtn.addEventListener('click', () => {
+      if (generator) {
+        generator.stop();
+        pauseBtn.textContent = '⏸️ Pause';
+      }
+    });
+
+    // Render QR Frame
+    function renderFrame(frameData, qrText) {
+      // Update stats
+      currentFrameEl.textContent = frameData.f;
+      const stats = generator.getStats();
+      currentFPSEl.textContent = stats.avgFps;
+      runtimeEl.textContent = formatTime(stats.runtime);
+
+      // Update challenge chain
+      updateChallengeChain(frameData.c);
+
+      // Generate QR code
+      QRCode.toCanvas(canvas, qrText, {
+        width: canvas.width,
+        margin: 1,
+        color: {
+          dark: '#1F2937',
+          light: '#FFFFFF'
+        }
+      }, (error) => {
+        if (error) console.error(error);
+
+        // Apply visual transformation
+        applyTransformation(frameData.m);
+      });
+    }
+
+    function applyTransformation(modifier) {
+      // Apply rotation if needed
+      if (modifier.rotation) {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(modifier.rotation * Math.PI / 180);
+        ctx.translate(-canvas.width / 2, -canvas.height / 2);
+        ctx.putImageData(imageData, 0, 0);
+        ctx.restore();
+      }
+    }
+
+    function updateChallengeChain(challenge) {
+      const item = document.createElement('div');
+      item.className = 'challenge-item';
+      item.textContent = `> ${challenge}`;
+
+      const container = challengeChainEl;
+      container.appendChild(item);
+
+      // Keep only last 10
+      while (container.children.length > 10) {
+        container.removeChild(container.firstChild);
+      }
+
+      // Scroll to bottom
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function formatTime(ms) {
+      const seconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    // Simulate student check-ins (for demo)
+    function simulateStudentCheckins() {
+      const names = ['Alice Johnson', 'Bob Smith', 'Carol Davis', 'David Wilson', 'Eva Martinez'];
+
+      let count = 0;
+      const interval = setInterval(() => {
+        if (count >= names.length || !generator || !generator.isRunning) {
+          clearInterval(interval);
+          return;
+        }
+
+        addStudent(names[count]);
+        count++;
+      }, 8000); // Every 8 seconds
+    }
+
+    function addStudent(name) {
+      const student = {
+        name: name,
+        time: new Date().toLocaleTimeString(),
+        avatar: name.charAt(0)
+      };
+
+      students.push(student);
+      studentCountEl.textContent = students.length;
+
+      renderStudentsList();
+    }
+
+    function renderStudentsList() {
+      if (students.length === 0) {
+        studentsListEl.innerHTML = '<p class="text-gray text-center">No students checked in yet</p>';
+        return;
+      }
+
+      studentsListEl.innerHTML = students.slice(-5).reverse().map(student => `
+        <div class="student-item">
+          <div class="student-info">
+            <div class="student-avatar">${student.avatar}</div>
+            <div>
+              <div style="font-weight: 600;">${student.name}</div>
+              <div class="student-time">${student.time}</div>
+            </div>
+          </div>
+          <div class="status-indicator"></div>
+        </div>
+      `).join('');
+    }
+
+    function exportAttendance() {
+      if (students.length === 0) {
+        alert('No attendance data to export');
+        return;
+      }
+
+      const csv = 'Name,Time\n' + students.map(s => `${s.name},${s.time}`).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'attendance_' + Date.now() + '.csv';
+      a.click();
+    }
+  </script>
+
+</body>
+</html>

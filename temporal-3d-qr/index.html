@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temporal 3D QR Code - World's First Anti-Screenshot QR System</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/common.css">
+
+  <style>
+    /* Landing Page Specific Styles */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1" fill="white" opacity="0.1"/></svg>');
+      animation: float 20s linear infinite;
+    }
+
+    @keyframes float {
+      from { transform: translateY(0); }
+      to { transform: translateY(-100px); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      color: white;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      animation: slideInUp 0.8s ease-out;
+    }
+
+    .hero .subtitle {
+      font-size: 1.5rem;
+      opacity: 0.9;
+      margin-bottom: 2rem;
+      animation: slideInUp 1s ease-out;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      animation: slideInUp 1.2s ease-out;
+    }
+
+    .demo-qr {
+      background: white;
+      padding: 2rem;
+      border-radius: 2rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      margin-top: 3rem;
+      animation: slideInUp 1.4s ease-out;
+    }
+
+    #liveQR {
+      border-radius: 1rem;
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+    }
+
+    .qr-status {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: space-around;
+      color: var(--text-dark);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+    }
+
+    .status-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .status-label {
+      color: var(--text-gray);
+      font-size: 0.75rem;
+    }
+
+    .status-value {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.125rem;
+    }
+
+    .features {
+      padding: 5rem 0;
+      background: var(--bg-light);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .feature-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .feature-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+    }
+
+    .evolution {
+      padding: 5rem 0;
+      background: white;
+    }
+
+    .timeline {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 3rem;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 50px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      z-index: 0;
+    }
+
+    .timeline-item {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .timeline-badge {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border: 4px solid var(--primary);
+      border-radius: 50%;
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .timeline-item.active .timeline-badge {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      animation: pulse 2s infinite;
+    }
+
+    .cta-section {
+      padding: 5rem 0;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      text-align: center;
+    }
+
+    .pulse-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      background: #10B981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <div class="nav-logo">⚡ Temporal 3D QR</div>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="teacher.html" class="nav-link">Teacher</a></li>
+        <li><a href="student.html" class="nav-link">Student</a></li>
+        <li><a href="demo.html" class="nav-link">Live Demo</a></li>
+        <li><a href="analytics.html" class="nav-link">Analytics</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-content">
+      <h1>The World's First<br>Temporal 3D QR Code</h1>
+      <p class="subtitle">
+        <span class="pulse-dot"></span>
+        Screenshot-Proof • Lightning-Fast • Patent-Pending
+      </p>
+
+      <div class="hero-buttons">
+        <a href="demo.html" class="btn btn-primary">
+          🚀 Try Live Demo
+        </a>
+        <a href="teacher.html" class="btn btn-outline">
+          👨‍🏫 Teacher Dashboard
+        </a>
+      </div>
+
+      <!-- Live QR Demo -->
+      <div class="demo-qr">
+        <canvas id="liveQR" width="300" height="300"></canvas>
+        <div class="qr-status">
+          <div class="status-item">
+            <span class="status-label">FRAME</span>
+            <span class="status-value" id="frameCounter">0</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">FPS</span>
+            <span class="status-value">60</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">STATUS</span>
+            <span class="status-value" style="color: #10B981;">LIVE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2 class="text-center">Why Temporal 3D QR?</h2>
+      <p class="text-center text-gray">Revolutionary features that make counterfeiting impossible</p>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3>Screenshot Proof</h3>
+          <p>Detects and rejects static images, photos, and screenshots in milliseconds</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Lightning Fast</h3>
+          <p>Complete validation in under 500ms with 60 FPS temporal encoding</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔐</div>
+          <h3>Cryptographically Secure</h3>
+          <p>Rolling challenge chains prevent replay attacks and frame injection</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📵</div>
+          <h3>Works Offline</h3>
+          <p>Generates cryptographic proofs for validation when network is unavailable</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>100% Accurate</h3>
+          <p>Multi-layer temporal coherence analysis ensures authentic scans only</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>Any Smartphone</h3>
+          <p>Works on all modern phones - no special hardware required</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Evolution Timeline -->
+  <section class="evolution">
+    <div class="container">
+      <h2 class="text-center">The Evolution of Codes</h2>
+      <p class="text-center text-gray">From 1D to 2D to Temporal 3D</p>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-badge">|||</div>
+          <h4>Barcode</h4>
+          <p class="text-gray">1D - Linear</p>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-badge">⊞</div>
+          <h4>QR Code</h4>
+          <p class="text-gray">2D - Spatial</p>
+        </div>
+
+        <div class="timeline-item active">
+          <div class="timeline-badge">⚡</div>
+          <h4>Temporal 3D</h4>
+          <p class="text-gray">3D - Time Dimension</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <h2>Ready to Experience the Future?</h2>
+      <p style="font-size: 1.25rem; opacity: 0.9; margin-bottom: 2rem;">
+        Try the world's most advanced attendance verification system
+      </p>
+      <a href="demo.html" class="btn" style="background: white; color: var(--primary);">
+        🎮 Launch Interactive Demo
+      </a>
+    </div>
+  </section>
+
+  <!-- Simple QR Animation Script -->
+  <script>
+    // Simple animated QR code for landing page
+    const canvas = document.getElementById('liveQR');
+    const ctx = canvas.getContext('2d');
+    const frameCounter = document.getElementById('frameCounter');
+
+    let frame = 0;
+    const size = 300;
+    const moduleSize = 10;
+    const modules = size / moduleSize;
+
+    function generatePattern(frameNum) {
+      // Create animated pattern based on frame number
+      const pattern = [];
+      for (let y = 0; y < modules; y++) {
+        pattern[y] = [];
+        for (let x = 0; x < modules; x++) {
+          // Create rotating pattern
+          const distance = Math.sqrt(Math.pow(x - modules/2, 2) + Math.pow(y - modules/2, 2));
+          const angle = Math.atan2(y - modules/2, x - modules/2);
+          const value = Math.sin(distance * 0.3 - frameNum * 0.05 + angle) > 0;
+          pattern[y][x] = value;
+        }
+      }
+      return pattern;
+    }
+
+    function drawQR() {
+      const pattern = generatePattern(frame);
+
+      // Clear canvas
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, size, size);
+
+      // Draw pattern
+      ctx.fillStyle = '#1F2937';
+      for (let y = 0; y < modules; y++) {
+        for (let x = 0; x < modules; x++) {
+          if (pattern[y][x]) {
+            ctx.fillRect(x * moduleSize, y * moduleSize, moduleSize, moduleSize);
+          }
+        }
+      }
+
+      // Draw corner markers (typical QR code)
+      drawCornerMarker(0, 0);
+      drawCornerMarker(size - 70, 0);
+      drawCornerMarker(0, size - 70);
+
+      frame++;
+      frameCounter.textContent = frame;
+
+      requestAnimationFrame(drawQR);
+    }
+
+    function drawCornerMarker(x, y) {
+      // Outer square
+      ctx.fillStyle = '#1F2937';
+      ctx.fillRect(x, y, 70, 70);
+
+      // White square
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(x + 10, y + 10, 50, 50);
+
+      // Inner black square
+      ctx.fillStyle = '#1F2937';
+      ctx.fillRect(x + 20, y + 20, 30, 30);
+    }
+
+    // Start animation
+    drawQR();
+  </script>
+
+</body>
+</html>
